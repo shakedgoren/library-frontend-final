@@ -16,12 +16,12 @@ export function addBook(book:Book,access:string) {
 
 export function deleteBook(book:Book,access:string,) {
   return new Promise<{data:Book}>((resolve) => 
-  axios.put(MY_SERVER+"books/"+book.id+ "/",book,{headers:{'Authorization':`Bearer ${access}`}})
+  axios.put(MY_SERVER+"books/"+book.id,book,{headers:{'Authorization':`Bearer ${access}`}})
   .then(res=>resolve({data:res.data})));
 }
 
 export function updateBook(book:Book,access:string) {
   return new Promise<{data:Book}>((resolve) => 
-  axios.put(MY_SERVER+"books/"+book.id+ "/",book,{headers:{'Authorization':`Bearer ${access}`}})
+  axios.put(MY_SERVER+"books/"+book.id,book,{headers:{'Authorization':`Bearer ${access}`}})
   .then(res=>resolve({data:res.data})));
 }
