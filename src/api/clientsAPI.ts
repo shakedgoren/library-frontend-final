@@ -16,12 +16,12 @@ export function addClient(client:Client,access:string) {
 
 export function deleteClient(client:Client,access:string) {
   return new Promise<{data:Client}>((resolve) => 
-  axios.put(MY_SERVER+"clients/"+client.id+ "/",client,{headers:{'Authorization':`Bearer ${access}`}})
+  axios.put(MY_SERVER+"clients/"+client.id,client,{headers:{'Authorization':`Bearer ${access}`}})
   .then(res=>resolve({data:res.data})));
 }
 
 export function updateClient(client:Client,access:string) {
   return new Promise<{data:Client}>((resolve) => 
-  axios.put(MY_SERVER+"clients/"+client.id+ "/",client,{headers:{'Authorization':`Bearer ${access}`}})
+  axios.put(MY_SERVER+"clients/"+client.id,client,{headers:{'Authorization':`Bearer ${access}`}})
   .then(res=>resolve({data:res.data})));
 }
