@@ -1,1 +1,1 @@
-export const MY_SERVER = "http://127.0.0.1:8000/";
+export const MY_SERVER = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000/";
