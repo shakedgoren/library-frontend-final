@@ -1,1 +1,1 @@
-export const MY_SERVER = "https://library-backend-final.onrender.com/ֿapi/";
+export const MY_SERVER = "http://localhost:8000/api/";
