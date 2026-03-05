@@ -35,14 +35,14 @@ function isoToDisplay(iso?: string) {
   return `${d}/${m}/${y}`;
 }
 
-function daysLate(endDateIso?: string) {
+// calculates overdue days. For open loans: compareDate = today. For closed loans: compareDate = returnDate (actual return date)
+function daysLate(endDateIso?: string, compareDateIso?: string | null) {
   if (!endDateIso) return 0;
   const due = new Date(endDateIso);
-  const now = new Date();
-  // נטרול שעות כדי לקבל ימים נקיים
+  const compareDate = compareDateIso ? new Date(compareDateIso) : new Date();
   due.setHours(0, 0, 0, 0);
-  now.setHours(0, 0, 0, 0);
-  const diff = now.getTime() - due.getTime();
+  compareDate.setHours(0, 0, 0, 0);
+  const diff = compareDate.getTime() - due.getTime();
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   return Math.max(0, days);
 }
@@ -116,6 +116,13 @@ const Loans = () => {
     // 3. Sort
     if (!sortKey) return result;
 
+    // Helper: status priority - Overdue (0) > Active (1) > Closed (2)
+    const getStatusPriority = (loan: any) => {
+      if (loan.loanStatus === true) return 2; // closed/returned
+      const late = daysLate(loan.endDate); // open loan, compare to today
+      return late > 0 ? 0 : 1; // 0=overdue, 1=active
+    };
+
     const dir = sortDir === "asc" ? 1 : -1;
     return result.slice().sort((a, b) => {
       if (sortKey === "book") {
@@ -132,9 +139,7 @@ const Loans = () => {
         return (new Date(a.startDate).getTime() - new Date(b.startDate).getTime()) * dir;
       }
       if (sortKey === "status") {
-        const valA = a.loanStatus ? 1 : 0;
-        const valB = b.loanStatus ? 1 : 0;
-        return (valA - valB) * dir;
+        return (getStatusPriority(a) - getStatusPriority(b)) * dir;
       }
       return 0;
     });
@@ -240,7 +245,9 @@ const Loans = () => {
   function toggleLoanStatus(loan: any) {
     if (!access) return;
 
-    // בשונה ממחיקה, אנחנו פשוט מעדכנים את הסטטוס ל-true (מוחזר)
+    const closing = !loan.loanStatus; // true = we are now closing the loan
+    const todayISO = toISODate(new Date());
+
     dispatch(
       updateLoanAsync({
         loan: {
@@ -250,6 +257,8 @@ const Loans = () => {
           startDate: loan.startDate,
           endDate: loan.endDate,
           loanStatus: !loan.loanStatus,
+          // שמור תאריך החזרה בפועל כדי לחשב עיכוב
+          returnDate: closing ? todayISO : null,
         },
         access,
       })
@@ -451,8 +460,11 @@ const Loans = () => {
 
           <tbody>
             {filteredAndSortedLoans.map((loan: any) => {
-              const isClosed = loan.loanStatus === true; // בקוד 1: true = returned/closed
-              const overdueDays = !isClosed ? daysLate(loan.endDate) : 0;
+              const isClosed = loan.loanStatus === true;
+              // For open loans: delay from endDate to today. For closed loans: delay from endDate to returnDate
+              const overdueDays = isClosed
+                ? daysLate(loan.endDate, loan.returnDate)
+                : daysLate(loan.endDate);
               const statusText = isClosed ? "הוחזר" : overdueDays > 0 ? "מאוחר" : "פעיל";
 
               const rowClass = overdueDays > 0 && !isClosed ? "overdue-row" : "";
