@@ -77,6 +77,21 @@ const Loans = () => {
     return toISODate(date);
   };
 
+  // sorting
+  type SortKey = "book" | "client" | "date" | "status" | null;
+  type SortDir = "asc" | "desc";
+  const [sortKey, setSortKey] = useState<SortKey>(null);
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  const toggleSort = (key: Exclude<SortKey, null>) => {
+    if (sortKey === key) {
+      setSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
   useEffect(() => {
     if (!access) return;
     dispatch(getLoansAsync(access));
@@ -84,20 +99,46 @@ const Loans = () => {
     dispatch(getClientsAsync(access));
   }, [dispatch, access, refresh]);
 
-  const filteredLoans = useMemo(() => {
-    const byCondition =
-      condition === "all"
-        ? loans
-        : loans.filter((l) => l.loanStatus === condition);
+  const filteredAndSortedLoans = useMemo(() => {
+    // 1. Filter by condition (Open/Closed/All)
+    let result = condition === "all"
+      ? loans
+      : loans.filter((l) => l.loanStatus === condition);
 
+    // 2. Filter by Search
     const q = search.trim().toLowerCase();
-    if (!q) return byCondition;
+    if (q) {
+      result = result.filter((l) =>
+        String(l?.clientID?.name ?? l?.clientID?.clientName ?? "").toLowerCase().includes(q)
+      );
+    }
 
-    // בקוד 1 היה loan.clientID.name (אובייקט). נשמור תאימות:
-    return byCondition.filter((l) =>
-      String(l?.clientID?.name ?? "").toLowerCase().includes(q)
-    );
-  }, [loans, condition, search]);
+    // 3. Sort
+    if (!sortKey) return result;
+
+    const dir = sortDir === "asc" ? 1 : -1;
+    return result.slice().sort((a, b) => {
+      if (sortKey === "book") {
+        const nameA = (a?.bookID?.name ?? a?.bookID?.bookName ?? "").toLowerCase();
+        const nameB = (b?.bookID?.name ?? b?.bookID?.bookName ?? "").toLowerCase();
+        return nameA.localeCompare(nameB, "he") * dir;
+      }
+      if (sortKey === "client") {
+        const nameA = (a?.clientID?.name ?? a?.clientID?.clientName ?? "").toLowerCase();
+        const nameB = (b?.clientID?.name ?? b?.clientID?.clientName ?? "").toLowerCase();
+        return nameA.localeCompare(nameB, "he") * dir;
+      }
+      if (sortKey === "date") {
+        return (new Date(a.startDate).getTime() - new Date(b.startDate).getTime()) * dir;
+      }
+      if (sortKey === "status") {
+        const valA = a.loanStatus ? 1 : 0;
+        const valB = b.loanStatus ? 1 : 0;
+        return (valA - valB) * dir;
+      }
+      return 0;
+    });
+  }, [loans, condition, search, sortKey, sortDir]);
 
   function resetForm() {
     setEditingId(null);
@@ -144,7 +185,7 @@ const Loans = () => {
           bookID,
           startDate,
           endDate: dateLoans(bookType, startDate),
-          bookStatus: false, // כמו בקוד 1
+          loanStatus: false,
         },
         access,
       })
@@ -199,8 +240,9 @@ const Loans = () => {
   function toggleLoanStatus(loan: any) {
     if (!access) return;
 
+    // בשונה ממחיקה, אנחנו פשוט מעדכנים את הסטטוס ל-true (מוחזר)
     dispatch(
-      deleteLoanAsync({
+      updateLoanAsync({
         loan: {
           id: loan.id,
           bookID: loan?.bookID?.id,
@@ -213,7 +255,7 @@ const Loans = () => {
       })
     );
 
-    toast(loan.loanStatus ? "Loan opened" : "Loan closed (returned)", {
+    toast(loan.loanStatus ? "השאלה נפתחה מחדש" : "הספר הוחזר בהצלחה", {
       position: "top-right",
       autoClose: 3000,
       type: "info",
@@ -238,7 +280,7 @@ const Loans = () => {
 
       {/* Header */}
       <div className="card-header">
-        <h2 className="card-title">השאלות ({filteredLoans.length})</h2>
+        <h2 className="card-title">השאלות ({filteredAndSortedLoans.length})</h2>
 
         <button
           className="btn-primary"
@@ -369,18 +411,46 @@ const Loans = () => {
         <table className="data-table">
           <thead>
             <tr>
-              <th>ספר</th>
-              <th>לקוח</th>
-              <th>תאריך השאלה</th>
+              <th onClick={() => toggleSort("book")} className="sortable-th">
+                <span className="th-content">
+                  ספר
+                  <span className={`sort-icon ${sortKey === "book" ? "active" : ""}`}>
+                    {sortKey === "book" ? (sortDir === "asc" ? "▲" : "▼") : "⇅"}
+                  </span>
+                </span>
+              </th>
+              <th onClick={() => toggleSort("client")} className="sortable-th">
+                <span className="th-content">
+                  לקוח
+                  <span className={`sort-icon ${sortKey === "client" ? "active" : ""}`}>
+                    {sortKey === "client" ? (sortDir === "asc" ? "▲" : "▼") : "⇅"}
+                  </span>
+                </span>
+              </th>
+              <th onClick={() => toggleSort("date")} className="sortable-th">
+                <span className="th-content">
+                  תאריך השאלה
+                  <span className={`sort-icon ${sortKey === "date" ? "active" : ""}`}>
+                    {sortKey === "date" ? (sortDir === "asc" ? "▲" : "▼") : "⇅"}
+                  </span>
+                </span>
+              </th>
               <th>תאריך החזרה</th>
-              <th>סטטוס</th>
+              <th onClick={() => toggleSort("status")} className="sortable-th">
+                <span className="th-content">
+                  סטטוס
+                  <span className={`sort-icon ${sortKey === "status" ? "active" : ""}`}>
+                    {sortKey === "status" ? (sortDir === "asc" ? "▲" : "▼") : "⇅"}
+                  </span>
+                </span>
+              </th>
               <th>ימי עיכוב</th>
               <th>פעולות</th>
             </tr>
           </thead>
 
           <tbody>
-            {filteredLoans.map((loan: any) => {
+            {filteredAndSortedLoans.map((loan: any) => {
               const isClosed = loan.loanStatus === true; // בקוד 1: true = returned/closed
               const overdueDays = !isClosed ? daysLate(loan.endDate) : 0;
               const statusText = isClosed ? "הוחזר" : overdueDays > 0 ? "מאוחר" : "פעיל";
@@ -390,48 +460,35 @@ const Loans = () => {
 
               return (
                 <tr key={loan.id} className={`loan-row ${rowClass}`}>
-
                   <td>{loan?.bookID?.name ?? loan?.bookID?.bookName ?? ""}</td>
-
                   <td>{loan?.clientID?.name ?? loan?.clientID?.clientName ?? ""}</td>
-
                   <td>{isoToDisplay(loan.startDate)}</td>
-
                   <td>{isoToDisplay(loan.endDate)}</td>
-
                   <td>
                     <span className={`status-badge ${statusClass}`}>{statusText}</span>
                   </td>
-
                   <td>
                     <span className={`days-badge ${overdueDays > 0 ? "warning" : "success"}`}>
                       {overdueDays > 0 ? `+${overdueDays}` : "בזמן"}
                     </span>
                   </td>
-
                   <td>
                     <button
                       className="btn-small success"
                       onClick={() => {
-                        // "החזר" = לסגור השאלה (loanStatus=true)
-                        if (!loan.loanStatus) toggleLoanStatus(loan);
+                        // "החזר" = שינוי סטטוס למוחזר
+                        toggleLoanStatus(loan);
                       }}
                       type="button"
                       style={{ opacity: loan.loanStatus ? 0.5 : 1 }}
-                      title={loan.loanStatus ? "כבר הוחזר" : "החזר ספר"}
+                      title={loan.loanStatus ? "השאלה סגורה" : "החזר ספר"}
                     >
-                      ✅ החזר
+                      {loan.loanStatus ? "🔄 פתח" : "✅ החזר"}
                     </button>
 
                     <button className="btn-small edit" onClick={() => openEditForm(loan)} type="button">
                       ✏️ ערוך
                     </button>
-
-                    {overdueDays > 0 && !isClosed && (
-                      <button className="btn-small warning" type="button">
-                        ⏰ התראה
-                      </button>
-                    )}
                   </td>
                 </tr>
               );
@@ -441,7 +498,7 @@ const Loans = () => {
       </div>
 
       {/* Empty */}
-      {filteredLoans.length === 0 && (
+      {filteredAndSortedLoans.length === 0 && (
         <div className="empty-state">
           <div className="empty-icon">📈</div>
           <h3>אין השאלות להצגה</h3>
