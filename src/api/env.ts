@@ -1,1 +1,1 @@
-export const MY_SERVER = "http://localhost:8000/api/";
+export const MY_SERVER = "https://srv-d5vjgujuibrs73crlb00.onrender.com/api/";
