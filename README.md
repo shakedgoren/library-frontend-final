@@ -3,7 +3,7 @@
 This repository contains the **Frontend Application** for the **Library Management System**, a modern, responsive web application built to handle library operations seamlessly.
 
 ## 🔗 Live Application
-- **Live Demo:** [Click Here to Visit](#)  
+- **Live Demo:** [Click Here to Visit](https://library-frontend-final.netlify.app/)  
 *(Use **shaked_admin** / **12345678** to explore the admin dashboard)*
 
 ## 🛠 Tech Stack
@@ -49,4 +49,4 @@ To run this frontend locally:
    ```
 4. The application will be available at `http://localhost:3000`.
 
-*Designed and Developed by [Shaked Goren](https://github.com/shakedgoren)*
+*Designed and Developed by [Shaked Liloz](https://github.com/shakedgoren)*
