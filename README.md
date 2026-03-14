@@ -1,46 +1,52 @@
-# Getting Started with Create React App
+# Library Management System - Frontend App 📚
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app), using the [Redux](https://redux.js.org/) and [Redux Toolkit](https://redux-toolkit.js.org/) TS template.
+This repository contains the **Frontend Application** for the **Library Management System**, a modern, responsive web application built to handle library operations seamlessly.
 
-## Available Scripts
+## 🔗 Live Application
+- **Live Demo:** [Click Here to Visit](#)  
+*(Use **shaked_admin** / **12345678** to explore the admin dashboard)*
 
-In the project directory, you can run:
+## 🛠 Tech Stack
+- **Core:** React 18, TypeScript, Create React App
+- **State Management:** Redux Toolkit & React-Redux
+- **Styling & UI Components:** 
+  - Material UI (MUI)
+  - Ant Design
+  - NextUI
+  - TailwindCSS & Framer Motion (for fluid animations)
+- **HTTP Client:** Axios (with interceptors for JWT auth)
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## 🏗 Key Features & Architecture
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+### 1. Robust State Management
+Powered by **Redux Toolkit**, the application effortlessly abstracts complex global state, including active user sessions, shopping carts (or book reservations), and loading states across the platform.
 
-### `npm test`
+### 2. Comprehensive UI Systems
+Instead of relying on a single UI framework, this project selectively implements components from **Material UI**, **Ant Design**, and **NextUI**, orchestrated cohesively with **TailwindCSS** to provide a rich, accessible, and premium User Experience (UX).
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 3. JWT Authentication & Security
+- Secure token parsing using `jwt-decode`.
+- Protected routing ensuring that administrative pages (managing books, viewing user loans) remain strictly separated from standard user views.
 
-### `npm run build`
+### 4. Interactive Micro-Animations
+Utilizes **Framer Motion** for smooth page transitions and micro-interactions, providing users with instant, satisfying feedback. Features like successful book returns trigger fun, celebratory visual effects via `canvas-confetti`.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+---
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## ⚙️ Running Locally
+To run this frontend locally:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. Clone the repository.
+2. Install the necessary dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the development server:
+   ```bash
+   npm start
+   ```
+4. The application will be available at `http://localhost:3000`.
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+*Designed and Developed by [Shaked Goren](https://github.com/shakedgoren)*
